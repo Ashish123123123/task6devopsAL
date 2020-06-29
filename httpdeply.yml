@@ -1,0 +1,64 @@
+apiVersion: apps/v1 
+kind: Deployment
+metadata:
+  name: htmlwebsite
+  labels: 
+    app: htmlwebsite
+    purpose: Task6
+    status: Completed
+spec:
+  selector:
+    matchLabels:
+      app: htmlwebsite
+      purpose: Task6
+      status: Completed
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: htmlwebsite
+        purpose: Task6
+        status: Completed
+    spec:
+      containers:
+      - image: httpd
+        name: htmlwebsite
+        ports:
+        - containerPort: 80
+          name: htmlwebsite
+        volumeMounts:
+        - name: htmlwebsite-persistent-storage
+          mountPath: /usr/local/apache2/htdocs/
+      volumes:
+      - name: htmlwebsite-persistent-storage
+        persistentVolumeClaim:
+          claimName: htmlwebsite-pv-claim
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: htmlwebsite-pv-claim
+  labels:
+    app: htmlwebsite
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi    
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: htmlwebsite
+  labels:
+    app: htmlwebsite
+    env: production
+spec:
+  ports:
+    - port: 80
+      nodePort: 30052
+  selector:
+    app: htmlwebsite
+  type: NodePort

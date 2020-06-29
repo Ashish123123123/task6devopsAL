@@ -1,0 +1,64 @@
+apiVersion: apps/v1 
+kind: Deployment
+metadata:
+  name: phpwebsite
+  labels: 
+    app: phpwebsite
+    purpose: Task6
+    status: Completed
+spec:
+  selector:
+    matchLabels:
+      app: phpwebsite
+      purpose: Task6
+      status: Completed
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: phpwebsite
+        purpose: Task6
+        status: Completed
+    spec:
+      containers:
+      - image: php
+        name: phpwebsite
+        ports:
+        - containerPort: 80
+          name: phpwebsite
+        volumeMounts:
+        - name: phpwebsite-persistent-storage
+          mountPath: /var/www/html/
+      volumes:
+      - name: phpwebsite-persistent-storage
+        persistentVolumeClaim:
+          claimName: phpwebsite-pv-claim
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: phpwebsite-pv-claim
+  labels:
+    app: phpwebsite
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi    
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: phpwebsite
+  labels:
+    app: phpwebsite
+    env: production
+spec:
+  ports:
+    - port: 80
+      nodePort: 30052
+  selector:
+    app: phpwebsite
+  type: NodePort 
